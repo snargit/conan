@@ -76,6 +76,7 @@ class MacrosTemplate(CMakeDepsFileTemplate):
                         set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_IMPLIB${config_suffix} ${CONAN_FOUND_LIBRARY})
                         message(DEBUG "Found DLL and STATIC at ${CONAN_SHARED_FOUND_LIBRARY}, ${CONAN_FOUND_LIBRARY}")
                      endif()
+                     unset(CONAN_SHARED_FOUND_LIBRARY CACHE)
                    else()
                      if(NOT TARGET ${_LIB_NAME})
                          # library_type can be STATIC, still UNKNOWN (if no package type available in the recipe) or SHARED (but no windows)
@@ -90,7 +91,6 @@ class MacrosTemplate(CMakeDepsFileTemplate):
                    message(FATAL_ERROR "Library '${_LIBRARY_NAME}' not found in package. If '${_LIBRARY_NAME}' is a system library, declare it with 'cpp_info.system_libs' property")
                endif()
                unset(CONAN_FOUND_LIBRARY CACHE)
-               unset(CONAN_SHARED_FOUND_LIBRARY CACHE)
            endforeach()
 
            # Add the dependencies target for all the imported libraries
