@@ -87,6 +87,9 @@ conan.conf
 #VScode folder
 .vscode
 
+#Visual Studio folder
+.vs
+
 #Generated certificate file
 cacert.pem
 
