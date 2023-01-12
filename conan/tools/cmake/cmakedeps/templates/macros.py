@@ -43,7 +43,8 @@ class MacrosTemplate(CMakeDepsFileTemplate):
 
 
        function(conan_package_library_targets libraries package_libdir package_bindir library_type
-                is_host_windows deps_target out_libraries_target config_suffix package_name no_soname_mode)
+                is_host_windows deps_target out_libraries_target config_suffix package_name no_soname_mode
+                configuration_name)
            set(_out_libraries_target "")
 
            foreach(_LIBRARY_NAME ${libraries})
@@ -68,12 +69,14 @@ class MacrosTemplate(CMakeDepsFileTemplate):
                           add_library(${_LIB_NAME} UNKNOWN IMPORTED)
                        endif()
                        set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_LOCATION${config_suffix} ${CONAN_FOUND_LIBRARY})
+                       set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_CONFIGURATIONS "${configuration_name}")
                      else()
                         if(NOT TARGET ${_LIB_NAME})
                           add_library(${_LIB_NAME} SHARED IMPORTED)
                         endif()
                         set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_LOCATION${config_suffix} ${CONAN_SHARED_FOUND_LIBRARY})
                         set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_IMPLIB${config_suffix} ${CONAN_FOUND_LIBRARY})
+                        set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_CONFIGURATIONS "${configuration_name}")
                         message(DEBUG "Found DLL and STATIC at ${CONAN_SHARED_FOUND_LIBRARY}, ${CONAN_FOUND_LIBRARY}")
                      endif()
                      unset(CONAN_SHARED_FOUND_LIBRARY CACHE)
@@ -84,6 +87,7 @@ class MacrosTemplate(CMakeDepsFileTemplate):
                      endif()
                      message(DEBUG "Created target ${_LIB_NAME} ${library_type} IMPORTED")
                      set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_LOCATION${config_suffix} ${CONAN_FOUND_LIBRARY} IMPORTED_NO_SONAME${config_suffix} ${no_soname_mode})
+                     set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_CONFIGURATIONS "${configuration_name}")
                    endif()
                    list(APPEND _out_libraries_target ${_LIB_NAME})
                    message(VERBOSE "Conan: Found: ${CONAN_FOUND_LIBRARY}")

@@ -79,7 +79,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                                       {{ pkg_name }}_LIBRARIES_TARGETS  # out_libraries_targets
                                       "{{ config_suffix }}"
                                       "{{ pkg_name }}"    # package_name
-                                      "{{ '${' }}{{ pkg_name }}_NO_SONAME_MODE{{ config_suffix }}}")  # soname
+                                      "{{ '${' }}{{ pkg_name }}_NO_SONAME_MODE{{ config_suffix }}}" # soname
+                                      "{{ configuration }}")
 
         # FIXME: What is the result of this for multi-config? All configs adding themselves to path?
         set(CMAKE_MODULE_PATH {{ '${' }}{{ pkg_name }}_BUILD_DIRS{{ config_suffix }}} {{ '${' }}CMAKE_MODULE_PATH})
@@ -162,7 +163,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                                       {{ pkg_name }}_{{ comp_variable_name }}_LIBRARIES_TARGETS
                                       "{{ config_suffix }}"
                                       "{{ pkg_name }}_{{ comp_variable_name }}"
-                                      "{{ '${'+pkg_name+'_'+comp_variable_name+'_NO_SONAME_MODE'+config_suffix+'}' }}")
+                                      "{{ '${'+pkg_name+'_'+comp_variable_name+'_NO_SONAME_MODE'+config_suffix+'}' }}"
+                                      "{{ configuration }}")
 
 
                 ########## TARGET PROPERTIES #####################################
