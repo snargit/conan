@@ -55,21 +55,31 @@ class TargetsTemplate(CMakeDepsFileTemplate):
     @property
     def template(self):
         return textwrap.dedent("""\
-        macro(set_imported_configs target)
+        macro(set_imported_configs target foundConfs)
             get_property(hasImportedConfigs TARGET ${target} PROPERTY IMPORTED_CONFIGURATIONS DEFINED)
             if (hasImportedConfigs)
                 get_target_properties(existingImportedConfigs ${target} IMPORTED_CONFIGURATIONS)
-                list(APPEND existingImportedConfigs {{configuration}})
+                list(APPEND existingImportedConfigs ${foundConfs})
                 list(REMOVE_DUPLICATES existingImportedConfigs)
                 set_target_properties(${target} IMPORTED_CONFIGURATIONS ${existingImportedConfigs})
             else()
-                set_property(TARGET ${target} PROPERTY IMPORTED_CONFIGURATIONS {{configuration}})
+                set_property(TARGET ${target} PROPERTY IMPORTED_CONFIGURATIONS ${foundConfs})
             endif()
         endmacro()
 
         # Load the debug and release variables
         get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-        file(GLOB DATA_FILES "{{data_pattern}}")
+        file(GLOB DATA_FILES LIST_DIRECTORIES false "{{data_pattern}}")
+
+        # Figure out the available configurations
+        set(allConfigs "")
+        foreach(fn ${DATA_FILES})
+            if (fn MATCHES ".*-(.*)-.*")
+                string(TOUPPER ${CMAKE_MATCH_1} cfUpper)
+                list(APPEND allConfigs ${cfUpper})
+            endif()
+        endforeach()
+        list(REMOVE_DUPLICATES allConfigs)
 
         foreach(f ${DATA_FILES})
             include(${f})
@@ -81,14 +91,14 @@ class TargetsTemplate(CMakeDepsFileTemplate):
                 add_library(${_COMPONENT} INTERFACE IMPORTED)
                 message(STATUS "Conan: Component target declared '${_COMPONENT}'")
             endif()
-            set_imported_configs(${_COMPONENT})
+            set_imported_configs(${_COMPONENT} ${allConfigs})
         endforeach()
 
         if(NOT TARGET {{ root_target_name }})
             add_library({{ root_target_name }} INTERFACE IMPORTED)
             message(STATUS "Conan: Target declared '{{ root_target_name }}'")
         endif()
-        set_imported_configs({{ root_target_name }})
+        set_imported_configs({{ root_target_name }} ${allConfigs})
 
         {%- for alias, target in cmake_target_aliases.items() %}
 
@@ -98,7 +108,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         else()
             message(WARNING "Target name '{{alias}}' already exists.")
         endif()
-        set_imported_configs({{alias}})
+        set_imported_configs({{alias}} ${allConfigs})
 
         {%- endfor %}
 
@@ -112,7 +122,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         else()
             message(WARNING "Target name '{{alias}}' already exists.")
         endif()
-        set_imported_configs({{alias}})
+        set_imported_configs({{alias}} ${allConfigs})
 
             {%- endfor %}
 
@@ -131,6 +141,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
             string(TOUPPER ${CMAKE_BUILD_TYPE} configUpper)
             if(NOT configUpper STREQUAL "{{configuration}}")
                 list(APPEND CMAKE_MAP_IMPORTED_CONFIG_${CMAKE_BUILD_TYPE} {{configuration}} )
+                list(APPEND CMAKE_MAP_IMPORTED_CONFIG_${CMAKE_BUILD_TYPE} "")
                 list(REMOVE_DUPLICATES CMAKE_MAP_IMPORTED_CONFIG_${CMAKE_BUILD_TYPE})
             endif()
         else()
@@ -138,6 +149,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
                 string(TOUPPER ${c} configUpper)
                 if(NOT configUpper STREQUAL "{{configuration}}")
                     list(APPEND CMAKE_MAP_IMPORTED_CONFIG_${configUpper} {{configuration}} )
+                    list(APPEND CMAKE_MAP_IMPORTED_CONFIG_${configUpper} "")
                     list(REMOVE_DUPLICATES CMAKE_MAP_IMPORTED_CONFIG_${configUpper})
                 endif()
             endforeach()
