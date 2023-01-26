@@ -88,14 +88,14 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         foreach(_COMPONENT {{ '${' + pkg_name + '_COMPONENT_NAMES' + '}' }} )
             if(NOT TARGET ${_COMPONENT})
                 add_library(${_COMPONENT} INTERFACE IMPORTED)
-                message(STATUS "Conan: Component target declared '${_COMPONENT}'")
+                message({% raw %}${{% endraw %}{{ file_name }}_MESSAGE_MODE} "Conan: Component target declared '${_COMPONENT}'")
             endif()
             set_imported_configs(${_COMPONENT} ${allConfigs})
         endforeach()
 
         if(NOT TARGET {{ root_target_name }})
             add_library({{ root_target_name }} INTERFACE IMPORTED)
-            message(STATUS "Conan: Target declared '{{ root_target_name }}'")
+            message({% raw %}${{% endraw %}{{ file_name }}_MESSAGE_MODE} "Conan: Target declared '{{ root_target_name }}'")
         endif()
         set_imported_configs({{ root_target_name }} ${allConfigs})
 
