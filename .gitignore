@@ -113,3 +113,4 @@ Session.vim
 !conans/test/unittests/client/build
 !conans/test/unittests/tools/build
 /TestResults
+/env
