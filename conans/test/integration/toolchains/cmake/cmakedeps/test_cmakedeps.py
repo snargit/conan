@@ -109,8 +109,8 @@ def test_cpp_info_component_objects():
         content = f.read()
         assert """set_property(TARGET hello::say
                      PROPERTY INTERFACE_LINK_LIBRARIES
-                     $<$<CONFIG:Release>:${hello_hello_say_OBJECTS_RELEASE}>
-                     $<$<CONFIG:Release>:${hello_hello_say_LIBRARIES_TARGETS}>
+                     $<$<CONFIG:Release>:${hello_hello_say_OBJECTS_RELEASE}
+                     ${hello_hello_say_LIBRARIES_TARGETS_RELEASE}>
                      APPEND)""" in content
         # If there are componets, there is not a global cpp so this is not generated
         assert "hello_OBJECTS_RELEASE" not in content
@@ -249,7 +249,7 @@ def test_dependency_props_from_consumer():
     config_content = client.load(config_file)
     assert "add_library(custom_bar_target_name INTERFACE IMPORTED)" in config_content
     components_module_content = client.load(components_module)
-    assert "add_library(bar_custom_bar_component_target_name_DEPS_TARGET INTERFACE IMPORTED)" in components_module_content
+    assert "add_library(bar_custom_bar_component_target_name_DEPS_TARGET_RELEASE INTERFACE IMPORTED)" in components_module_content
 
     client.save({"foo.py": foo.format(set_find_mode=set_find_mode.format(find_mode="'none'")),
                  "bar.py": bar}, clean_first=True)
@@ -355,10 +355,10 @@ def test_props_from_consumer_build_context_activated():
     assert "add_library(custom_bar_build_target_name INTERFACE IMPORTED)" in config_content_build
 
     components_module_content = client.load(components_module)
-    assert "add_library(bar_custom_bar_component_target_name_DEPS_TARGET INTERFACE IMPORTED)" in components_module_content
+    assert "add_library(bar_custom_bar_component_target_name_DEPS_TARGET_RELEASE INTERFACE IMPORTED)" in components_module_content
 
     components_module_content_build = client.load(components_module_build)
-    assert "add_library(bar_BUILD_custom_bar_build_component_target_name_DEPS_TARGET INTERFACE IMPORTED)" in components_module_content_build
+    assert "add_library(bar_BUILD_custom_bar_build_component_target_name_DEPS_TARGET_RELEASE INTERFACE IMPORTED)" in components_module_content_build
 
     client.save(
         {"foo.py": foo.format(set_find_mode=set_find_mode.format(find_mode="'none'")), "bar.py": bar},
