@@ -47,8 +47,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
                "data_pattern": data_pattern,
                "target_pattern": target_pattern,
                "cmake_target_aliases": cmake_target_aliases,
-               "cmake_component_target_aliases": cmake_component_target_aliases,
-               "configuration": self.cmakedeps.configuration.upper()}
+               "cmake_component_target_aliases": cmake_component_target_aliases}
 
         return ret
 
