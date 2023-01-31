@@ -488,10 +488,6 @@ class TestClient(object):
             trace = traceback.format_exc()
             error = command.exception_exit_error(e)
         finally:
-            try:
-                self.api.app.cache.closedb()
-            except AttributeError:
-                pass
             sys.path = old_path
             os.chdir(current_dir)
             # Reset sys.modules to its prev state. A .copy() DOES NOT WORK
@@ -718,6 +714,11 @@ class TestClient(object):
                     break
             else:
                 raise AssertionError(f"Cant find {r}-{kind} in {reqs}")
+
+    def created_test_build_folder(self, ref):
+        build_folder = re.search(r"{} \(test package\): Test package build: (.*)".format(str(ref)),
+                                 str(self.out)).group(1)
+        return build_folder.replace("\\", "/")
 
     def created_package_id(self, ref):
         package_id = re.search(r"{}: Package '(\S+)' created".format(str(ref)),
