@@ -94,7 +94,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
             set_property(TARGET {{root_target_name}}
                          PROPERTY INTERFACE_LINK_LIBRARIES
                          $<$<CONFIG:{{configuration}}>:{{ '${'+pkg_name+'_OBJECTS'+config_suffix+'}' }}
-                         ${{'{'}}{{pkg_name}}_LIBRARIES_TARGETS{{config_suffix}}}>
+                                    ${{'{'}}{{pkg_name}}_LIBRARIES_TARGETS{{config_suffix}}}>
                          APPEND)
 
             if("{{ '${' }}{{ pkg_name }}_LIBS{{ config_suffix }}}" STREQUAL "")
@@ -179,7 +179,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 set_property(TARGET {{comp_target_name}}
                              PROPERTY INTERFACE_LINK_LIBRARIES
                              $<$<CONFIG:{{configuration}}>:{{ '${'+pkg_name+'_'+comp_variable_name+'_OBJECTS'+config_suffix+'}' }}
-                             ${{'{'}}{{pkg_name}}_{{comp_variable_name}}_LIBRARIES_TARGETS{{config_suffix}}}>
+                                        ${{'{'}}{{pkg_name}}_{{comp_variable_name}}_LIBRARIES_TARGETS{{config_suffix}}}>
                              APPEND)
 
                 if("{{ '${' }}{{ pkg_name }}_{{comp_variable_name}}_LIBS{{ config_suffix }}}" STREQUAL "")

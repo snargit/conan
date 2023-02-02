@@ -47,7 +47,8 @@ class TargetsTemplate(CMakeDepsFileTemplate):
                "data_pattern": data_pattern,
                "target_pattern": target_pattern,
                "cmake_target_aliases": cmake_target_aliases,
-               "cmake_component_target_aliases": cmake_component_target_aliases}
+               "cmake_component_target_aliases": cmake_component_target_aliases,
+               "cmake_component_target_name": self.file_name}
 
         return ret
 
@@ -64,6 +65,31 @@ class TargetsTemplate(CMakeDepsFileTemplate):
             else()
                 set_property(TARGET ${target} PROPERTY IMPORTED_CONFIGURATIONS ${foundConfs})
             endif()
+            get_target_property(allConfigs ${target} IMPORTED_CONFIGURATIONS)
+            if ("RELEASE" IN_LIST allConfigs)
+                if (NOT "MINSIZEREL" IN_LIST allConfigs)
+                    set_property(TARGET ${target} PROPERTY MAP_IMPORTED_CONFIG_MINSIZEREL Release)
+                endif()
+                if (NOT "RELWITHDEBINFO" IN_LIST allConfigs)
+                    set_property(TARGET ${target} PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
+                endif()
+            endif()
+            if ("MINSIZEREL" IN_LIST allConfigs)
+                if (NOT "RELEASE" IN_LIST allConfigs)
+                    set_property(TARGET ${target} PROPERTY MAP_IMPORTED_CONFIG_RELEASE MinSizeRel)
+                endif()
+                if (NOT "RELWITHDEBINFO" IN_LIST allConfigs)
+                    set_property(TARGET ${target} PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO MinSizeRel)
+                endif()
+            endif()
+            if ("RELWITHDEBINFO" IN_LIST allConfigs)
+                if (NOT "MINSIZEREL" IN_LIST allConfigs)
+                    set_property(TARGET ${target} PROPERTY MAP_IMPORTED_CONFIG_MINSIZEREL RelWithDebInfo)
+                endif()
+                if (NOT "RELEASE" IN_LIST allConfigs)
+                    set_property(TARGET ${target} PROPERTY MAP_IMPORTED_CONFIG_RELEASE RelWithDebInfo)
+                endif()
+            endif()
         endmacro()
 
         # Load the debug and release variables
@@ -73,8 +99,9 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         # Figure out the available configurations
         set(allConfigs "")
         foreach(fn ${DATA_FILES})
-            if (fn MATCHES ".*-(.*)-.*")
-                list(APPEND allConfigs $<UPPER_CASE:${CMAKE_MATCH_1})
+            if (fn MATCHES ".*{{cmake_component_target_name}}-(.*)-.*-.*data\.cmake")
+                string(TOUPPER "${CMAKE_MATCH_1}" upMatch)
+                list(APPEND allConfigs ${upMatch})
             endif()
         endforeach()
         list(REMOVE_DUPLICATES allConfigs)
