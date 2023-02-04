@@ -168,7 +168,7 @@ def test_transitive_modules_found(find_mode_PKGA, find_mode_PKGB, find_mode_cons
         """)
 
     cmakelist = textwrap.dedent("""
-        cmake_minimum_required(VERSION 3.1)
+        cmake_minimum_required(VERSION 3.3)
         project(test_package CXX)
         find_package(MYPKGB REQUIRED {find_mode})
         message("MYPKGB_VERSION: ${{MYPKGB_VERSION}}")
