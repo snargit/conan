@@ -99,7 +99,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         # Figure out the available configurations
         set(allConfigs "")
         foreach(fn ${DATA_FILES})
-            if (fn MATCHES ".*{{cmake_component_target_name}}-(.*)-.*-.*data\.cmake")
+            if (fn MATCHES ".*{{cmake_component_target_name}}-(.*)-.*-.*data\\.cmake")
                 string(TOUPPER "${CMAKE_MATCH_1}" upMatch)
                 list(APPEND allConfigs ${upMatch})
             endif()
