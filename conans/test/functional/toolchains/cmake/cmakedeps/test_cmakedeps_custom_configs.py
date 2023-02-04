@@ -45,7 +45,7 @@ class CustomConfigurationTest(unittest.TestCase):
         set(CMAKE_CONFIGURATION_TYPES Debug Release ReleaseShared CACHE STRING
             "Available build-types: Debug, Release and ReleaseShared")
 
-        cmake_minimum_required(VERSION 2.8)
+        cmake_minimum_required(VERSION 3.3)
         project(App C CXX)
 
         set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
