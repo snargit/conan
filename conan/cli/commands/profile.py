@@ -30,7 +30,7 @@ def detected_profile_cli_output(detect_profile):
 @conan_subcommand(formatters={"text": print_profiles})
 def profile_show(conan_api, parser, subparser, *args):
     """
-    Show profiles
+    Show aggregated profiles from the passed arguments.
     """
     add_profiles_args(subparser)
     args = parser.parse_args(*args)
@@ -41,7 +41,7 @@ def profile_show(conan_api, parser, subparser, *args):
 @conan_subcommand(formatters={"text": default_text_formatter})
 def profile_path(conan_api, parser, subparser, *args):
     """
-    Show profile path location
+    Show profile path location.
     """
     add_profiles_args(subparser)
     subparser.add_argument("name", help="Profile name")
@@ -52,7 +52,7 @@ def profile_path(conan_api, parser, subparser, *args):
 @conan_subcommand()
 def profile_detect(conan_api, parser, subparser, *args):
     """
-    Detect default profile
+    Generate a profile using auto-detected values.
     """
     subparser.add_argument("--name", help="Profile name, 'default' if not specified")
     subparser.add_argument("-f", "--force", action='store_true', help="Overwrite if exists")
@@ -67,8 +67,11 @@ def profile_detect(conan_api, parser, subparser, *args):
     detected_profile_cli_output(detected_profile)
     contents = detected_profile.dumps()
     ConanOutput().warning("This profile is a guess of your environment, please check it.")
+    if detected_profile.settings.get("os") == "Macos":
+        ConanOutput().warning("Defaulted to cppstd='gnu17' for apple-clang.")
     ConanOutput().warning("The output of this command is not guaranteed to be stable and can "
-                          "change in future Conan versions")
+                          "change in future Conan versions.")
+    ConanOutput().warning("Use your own profile files for stability.")
     ConanOutput().success(f"Saving detected profile to {profile_pathname}")
     save(profile_pathname, contents)
 
@@ -76,7 +79,7 @@ def profile_detect(conan_api, parser, subparser, *args):
 @conan_subcommand(formatters={"text": profiles_list_cli_output, "json": default_json_formatter})
 def profile_list(conan_api, parser, subparser, *args):
     """
-    List all profiles in the cache
+    List all profiles in the cache.
     """
     result = conan_api.profiles.list()
     return result
@@ -85,5 +88,5 @@ def profile_list(conan_api, parser, subparser, *args):
 @conan_command(group="Consumer")
 def profile(conan_api, parser, *args):
     """
-    Manages profiles
+    Manage profiles.
     """
