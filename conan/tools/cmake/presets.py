@@ -36,6 +36,8 @@ class _CMakePresets:
 
         if "CMAKE_POLICY_DEFAULT_CMP0091" not in cache_variables:
             cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
+        if "CMAKE_POLICY_DEFAULT_CMP0057" not in cache_variables:
+            cache_variables["CMAKE_POLICY_DEFAULT_CMP0057"] = "NEW"
 
         if "BUILD_TESTING" not in cache_variables:
             if conanfile.conf.get("tools.build:skip_test", check_type=bool):
