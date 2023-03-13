@@ -5,6 +5,7 @@ import textwrap
 import pytest
 from mock import patch
 
+from conan import conan_version
 from conans.errors import ConanException
 from conans.util.files import save
 from conans.test.utils.tools import TestClient
@@ -177,15 +178,34 @@ def test_composition_conan_conf_different_data_types_by_cli_arg(client):
 def test_jinja_global_conf(client):
     save(client.cache.new_config_path, "user.mycompany:parallel = {{os.cpu_count()/2}}\n"
                                        "user.mycompany:other = {{platform.system()}}\n"
-                                       "user.mycompany:dist = {{distro.id() if distro else '42'}}\n")
+                                       "user.mycompany:dist = {{distro.id() if distro else '42'}}\n"
+                                       "user.conan:version = {{conan_version}}-{{conan_version>0.1}}")
     client.run("install .")
     assert "user.mycompany:parallel={}".format(os.cpu_count()/2) in client.out
     assert "user.mycompany:other={}".format(platform.system()) in client.out
+    assert f"user.conan:version={conan_version}-True" in client.out
     if platform.system() == "Linux":
         import distro
         assert "user.mycompany:dist={}".format(distro.id()) in client.out
     else:
         assert "user.mycompany:dist=42" in client.out
+
+
+def test_jinja_global_conf_include(client):
+    global_conf = textwrap.dedent("""\
+        {% include "user_global.conf" %}
+        {% import "user_global.conf" as vars %}
+        user.mycompany:dist = {{vars.myvar*2}}
+        """)
+    user_global_conf = textwrap.dedent("""\
+        {% set myvar = 42 %}
+        user.mycompany:parallel = {{myvar}}
+        """)
+    save(client.cache.new_config_path, global_conf)
+    save(os.path.join(client.cache_folder, "user_global.conf"), user_global_conf)
+    client.run("install .")
+    assert "user.mycompany:parallel=42" in client.out
+    assert "user.mycompany:dist=84" in client.out
 
 
 def test_empty_conf_valid():
