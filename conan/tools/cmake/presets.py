@@ -209,59 +209,6 @@ class _IncludingPresets:
     """
     CMakeUserPresets or ConanPresets.json that include the main generated CMakePresets
     """
-    multiconfig = is_multi_configuration(generator)
-    conf = _configure_preset(conanfile, generator, cache_variables, toolchain_file, multiconfig,
-                             preset_prefix)
-    build = _build_and_test_preset_fields(conanfile, multiconfig, preset_prefix)
-    ret = {"version": _schema_version(conanfile, default=3),
-           "vendor": {"conan": {}},
-           "cmakeMinimumRequired": {"major": 3, "minor": 15, "patch": 0},
-           "configurePresets": [conf],
-           "buildPresets": [build],
-           "testPresets": [build]
-           }
-    return ret
-
-
-def write_cmake_presets(conanfile, toolchain_file, generator, cache_variables,
-                        user_presets_path=None, preset_prefix=None):
-    cache_variables = cache_variables or {}
-    if platform.system() == "Windows" and generator == "MinGW Makefiles":
-        if "CMAKE_SH" not in cache_variables:
-            cache_variables["CMAKE_SH"] = "CMAKE_SH-NOTFOUND"
-
-        cmake_make_program = conanfile.conf.get("tools.gnu:make_program",
-                                                default=cache_variables.get("CMAKE_MAKE_PROGRAM"))
-        if cmake_make_program:
-            cmake_make_program = cmake_make_program.replace("\\", "/")
-            cache_variables["CMAKE_MAKE_PROGRAM"] = cmake_make_program
-
-    if "CMAKE_POLICY_DEFAULT_CMP0091" not in cache_variables:
-        cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
-
-    if "BUILD_TESTING" not in cache_variables:
-        if conanfile.conf.get("tools.build:skip_test", check_type=bool):
-            cache_variables["BUILD_TESTING"] = "OFF"
-
-    preset_path = os.path.join(conanfile.generators_folder, "CMakePresets.json")
-    multiconfig = is_multi_configuration(generator)
-    if os.path.exists(preset_path) and multiconfig:
-        data = json.loads(load(preset_path))
-        build_preset = _build_and_test_preset_fields(conanfile, multiconfig, preset_prefix)
-        _insert_preset(data, "buildPresets", build_preset)
-        _insert_preset(data, "testPresets", build_preset)
-        configure_preset = _configure_preset(conanfile, generator, cache_variables, toolchain_file,
-                                             multiconfig, preset_prefix)
-        # Conan generated presets should have only 1 configurePreset, no more, overwrite it
-        data["configurePresets"] = [configure_preset]
-    else:
-        data = _contents(conanfile, toolchain_file, cache_variables, generator, preset_prefix)
-
-    preset_content = json.dumps(data, indent=4)
-    save(preset_path, preset_content)
-    ConanOutput(str(conanfile)).info("CMakeToolchain generated: CMakePresets.json")
-    _save_cmake_user_presets(conanfile, preset_path, user_presets_path, preset_prefix, data)
-
 
     @staticmethod
     def generate(conanfile, preset_path, user_presets_path, preset_prefix, preset_data):
