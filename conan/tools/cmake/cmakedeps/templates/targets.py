@@ -117,14 +117,14 @@ class TargetsTemplate(CMakeDepsFileTemplate):
                 add_library(${_COMPONENT} INTERFACE IMPORTED)
                 message({% raw %}${{% endraw %}{{ file_name }}_MESSAGE_MODE} "Conan: Component target declared '${_COMPONENT}'")
             endif()
-            set_imported_configs(${_COMPONENT} ${allConfigs})
+            set_imported_configs(${_COMPONENT} "${allConfigs}")
         endforeach()
 
         if(NOT TARGET {{ root_target_name }})
             add_library({{ root_target_name }} INTERFACE IMPORTED)
             message({% raw %}${{% endraw %}{{ file_name }}_MESSAGE_MODE} "Conan: Target declared '{{ root_target_name }}'")
         endif()
-        set_imported_configs({{ root_target_name }} ${allConfigs})
+        set_imported_configs({{ root_target_name }} "${allConfigs}")
 
         {%- for alias, target in cmake_target_aliases.items() %}
 
@@ -134,7 +134,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         else()
             message(WARNING "Target name '{{alias}}' already exists.")
         endif()
-        set_imported_configs({{alias}} ${allConfigs})
+        set_imported_configs({{alias}} "${allConfigs}")
 
         {%- endfor %}
 
@@ -148,7 +148,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         else()
             message(WARNING "Target name '{{alias}}' already exists.")
         endif()
-        set_imported_configs({{alias}} ${allConfigs})
+        set_imported_configs({{alias}} "${allConfigs}")
 
             {%- endfor %}
 
