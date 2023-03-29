@@ -71,7 +71,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
                     set_property(TARGET ${target} APPEND PROPERTY MAP_IMPORTED_CONFIG_MINSIZEREL Release)
                 endif()
                 if (NOT "RELWITHDEBINFO" IN_LIST allConfigs)
-                    set_property(TARGET ${target} EPPEND PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
+                    set_property(TARGET ${target} APPEND PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
                 endif()
             endif()
             if ("MINSIZEREL" IN_LIST allConfigs)
