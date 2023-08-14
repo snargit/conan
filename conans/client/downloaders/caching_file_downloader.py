@@ -43,7 +43,7 @@ class SourcesCachingDownloader:
                           download_cache_folder, backups_urls):
         """
         this download will first check in the local cache, if not there, it will go to the list
-        of backup_urls defined by user conf (by default ["origin"], and iterate it until
+        of backup_urls defined by user conf (by default ["origin"]), and iterate it until
         something is found.
         """
         # We are going to use the download_urls definition for backups
@@ -116,7 +116,7 @@ class SourcesCachingDownloader:
             if is_last:
                 raise NotFoundException(f"File {urls} not found in {backups_urls}")
             else:
-                self._output.warning(f"Sources not found in backup {backup_url}")
+                self._output.warning(f"File {urls} not found in {backup_url}")
         except (AuthenticationException, ForbiddenException) as e:
             raise ConanException(f"The source backup server '{backup_url}' "
                                  f"needs authentication: {e}. "
@@ -158,10 +158,10 @@ class ConanInternalCacheDownloader:
             raise ConanException("core.download:download_cache must be an absolute path")
         self._file_downloader = FileDownloader(requester, scope=scope)
 
-    def download(self, url, file_path, auth, verify_ssl, retry, retry_wait):
-        if not self._download_cache:
+    def download(self, url, file_path, auth, verify_ssl, retry, retry_wait, metadata=False):
+        if not self._download_cache or metadata:  # Metadata not cached and can be overwritten
             self._file_downloader.download(url, file_path, retry=retry, retry_wait=retry_wait,
-                                           verify_ssl=verify_ssl, auth=auth, overwrite=False)
+                                           verify_ssl=verify_ssl, auth=auth, overwrite=metadata)
             return
 
         download_cache = DownloadCache(self._download_cache)

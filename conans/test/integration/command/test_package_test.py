@@ -1,3 +1,4 @@
+import json
 import os
 import textwrap
 import unittest
@@ -16,6 +17,14 @@ class TestPackageTest(unittest.TestCase):
                      "test_package/conanfile.py": GenConanfile().with_test("pass")})
         client.run("create . --user=lasote --channel=stable")
         self.assertIn("hello/0.1@lasote/stable: Created package", client.out)
+
+    def test_basic_json(self):
+        client = TestClient()
+        client.save({CONANFILE: GenConanfile("hello", "0.1"),
+                     "test_package/conanfile.py": GenConanfile().with_test("pass")})
+        client.run("create . --format=json")
+        graph = json.loads(client.stdout)
+        assert graph["graph"]["nodes"]["1"]["ref"] == "hello/0.1#a90ba236e5310a473dae9f767a41db91"
 
     def test_test_only(self):
         test_conanfile = GenConanfile().with_test("pass")
@@ -379,3 +388,17 @@ def test_test_package_lockfile_location():
     assert os.path.exists(os.path.join(c.current_folder, "myconan.lock"))
     c.run("test test_package dep/0.1 --lockfile=myconan.lock --lockfile-out=myconan2.lock")
     assert os.path.exists(os.path.join(c.current_folder, "myconan2.lock"))
+
+
+def test_package_missing_binary_msg():
+    # https://github.com/conan-io/conan/issues/13904
+    c = TestClient()
+    c.save({"conanfile.py": GenConanfile("dep", "0.1"),
+            "test_package/conanfile.py": GenConanfile().with_test("pass")})
+    c.run("export .")
+    c.run("test test_package dep/0.1", assert_error=True)
+    assert "ERROR: Missing binary: dep/0.1" in c.out
+    assert "'conan test' tested packages must exist" in c.out
+    c.run("test test_package dep/0.1 --build=dep/0.1", assert_error=True)
+    assert "ERROR: Missing binary: dep/0.1" in c.out
+    assert "'conan test' tested packages must exist" in c.out

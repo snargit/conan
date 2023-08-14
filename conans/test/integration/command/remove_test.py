@@ -39,11 +39,8 @@ class RemoveWithoutUserChannel(unittest.TestCase):
     def test_local(self):
         self.client.save({"conanfile.py": GenConanfile()})
         self.client.run("create . --name=lib --version=1.0")
-        latest_rrev = self.client.cache.get_latest_recipe_reference(RecipeReference.loads("lib/1.0"))
-        ref_layout = self.client.cache.ref_layout(latest_rrev)
-        pkg_ids = self.client.cache.get_package_references(latest_rrev)
-        latest_prev = self.client.cache.get_latest_package_reference(pkg_ids[0])
-        pkg_layout = self.client.cache.pkg_layout(latest_prev)
+        ref_layout = self.client.exported_layout()
+        pkg_layout = self.client.created_layout()
         self.client.run("remove lib/1.0 -c")
         self.assertFalse(os.path.exists(ref_layout.base_folder))
         self.assertFalse(os.path.exists(pkg_layout.base_folder))
@@ -249,6 +246,7 @@ def test_new_remove_recipes_expressions(populated_client, with_remote, data):
     {"remove": "bar*#*50", "rrevs": [bar_rrev, bar_rrev2]},
     {"remove": "bar*#latest", "rrevs": [bar_rrev2]},  # latest is bar_rrev
     {"remove": "bar*#!latest", "rrevs": [bar_rrev]},  # latest is bar_rrev
+    {"remove": "bar*#~latest", "rrevs": [bar_rrev]},  # latest is bar_rrev
 ])
 def test_new_remove_recipe_revisions_expressions(populated_client, with_remote, data):
     r = "-r default" if with_remote else ""
@@ -311,6 +309,7 @@ def test_new_remove_package_expressions(populated_client, with_remote, data):
     {"remove": '{}#'.format(bar_rrev2_release), "prevs": []},
     {"remove": '{}#latest'.format(bar_rrev2_release), "prevs": [bar_rrev2_release_prev1]},
     {"remove": '{}#!latest'.format(bar_rrev2_release), "prevs": [bar_rrev2_release_prev2]},
+    {"remove": '{}#~latest'.format(bar_rrev2_release), "prevs": [bar_rrev2_release_prev2]},
 ])
 def test_new_remove_package_revisions_expressions(populated_client, with_remote, data):
     # Remove the ones we are not testing here
