@@ -131,8 +131,6 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         if(NOT TARGET {{alias}})
             add_library({{alias}} INTERFACE IMPORTED)
             set_property(TARGET {{ alias }} PROPERTY INTERFACE_LINK_LIBRARIES {{target}})
-        else()
-            message(WARNING "Target name '{{alias}}' already exists.")
         endif()
         set_imported_configs({{alias}} "${allConfigs}")
 
@@ -145,8 +143,6 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         if(NOT TARGET {{alias}})
             add_library({{alias}} INTERFACE IMPORTED)
             set_property(TARGET {{ alias }} PROPERTY INTERFACE_LINK_LIBRARIES {{target}})
-        else()
-            message(WARNING "Target name '{{alias}}' already exists.")
         endif()
         set_imported_configs({{alias}} "${allConfigs}")
 

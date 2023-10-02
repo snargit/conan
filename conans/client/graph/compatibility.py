@@ -90,12 +90,14 @@ class BinaryCompatibility:
         result = OrderedDict()
         original_info = conanfile.info
         original_settings = conanfile.settings
+        original_settings_target = conanfile.settings_target
         original_options = conanfile.options
         for c in compat_infos:
             # we replace the conanfile, so ``validate()`` and ``package_id()`` can
             # use the compatible ones
             conanfile.info = c
             conanfile.settings = c.settings
+            conanfile.settings_target = c.settings_target
             conanfile.options = c.options
             run_validate_package_id(conanfile)
             pid = c.package_id()
@@ -104,6 +106,7 @@ class BinaryCompatibility:
         # Restore the original state
         conanfile.info = original_info
         conanfile.settings = original_settings
+        conanfile.settings_target = original_settings_target
         conanfile.options = original_options
         return result
 
@@ -120,4 +123,7 @@ class BinaryCompatibility:
                 if options:
                     compat_info.options.update(options_values=OrderedDict(options))
                 result.append(compat_info)
+                settings_target = elem.get("settings_target")
+                if settings_target and compat_info.settings_target:
+                    compat_info.settings_target.update_values(settings_target)
         return result
