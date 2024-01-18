@@ -1,7 +1,7 @@
 import fnmatch
 import json
 
-from conans.client.graph.graph import RECIPE_EDITABLE, RECIPE_CONSUMER, RECIPE_SYSTEM_TOOL, \
+from conans.client.graph.graph import RECIPE_EDITABLE, RECIPE_CONSUMER, RECIPE_PLATFORM, \
     RECIPE_VIRTUAL, BINARY_SKIP, BINARY_MISSING, BINARY_INVALID
 from conans.errors import ConanException
 from conans.model.package_ref import PkgReference
@@ -99,7 +99,7 @@ class MultiPackagesList:
                         remote_list.add_refs([pyref])
 
             recipe = node["recipe"]
-            if recipe in (RECIPE_EDITABLE, RECIPE_CONSUMER, RECIPE_VIRTUAL, RECIPE_SYSTEM_TOOL):
+            if recipe in (RECIPE_EDITABLE, RECIPE_CONSUMER, RECIPE_VIRTUAL, RECIPE_PLATFORM):
                 continue
 
             ref = node["ref"]
@@ -134,6 +134,25 @@ class MultiPackagesList:
 class PackagesList:
     def __init__(self):
         self.recipes = {}
+
+    def split(self):
+        """
+        Returns a list of PackageList, splitted one per reference.
+        This can be useful to parallelize things like upload, parallelizing per-reference
+        """
+        result = []
+        for r, content in self.recipes.items():
+            subpkglist = PackagesList()
+            subpkglist.recipes[r] = content
+            result.append(subpkglist)
+        return result
+
+    def only_recipes(self):
+        result = {}
+        for ref, ref_dict in self.recipes.items():
+            for rrev_dict in ref_dict.get("revisions", {}).values():
+                rrev_dict.pop("packages", None)
+        return result
 
     def add_refs(self, refs):
         # RREVS alreday come in ASCENDING order, so upload does older revisions first
