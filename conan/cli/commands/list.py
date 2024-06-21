@@ -184,8 +184,9 @@ def prepare_pkglist_compact(pkglist):
             pkg_common_options = compute_common_options(prefs)
             pkg_common_options = pkg_common_options if len(pkg_common_options) > 4 else None
             for pref, pref_contents in prefs.items():
-                pref_info = pref_contents.pop("info")
-                pref_contents.update(compact_format_info(pref_info, pkg_common_options))
+                pref_info = pref_contents.pop("info", None)
+                if pref_info is not None:
+                    pref_contents.update(compact_format_info(pref_info, pkg_common_options))
                 diff_info = pref_contents.pop("diff", None)
                 if diff_info is not None:
                     pref_contents["diff"] = compact_diff(diff_info)
@@ -207,7 +208,7 @@ def list(conan_api: ConanAPI, parser, *args):
     """
     parser.add_argument('pattern', nargs="?",
                         help="A pattern in the form 'pkg/version#revision:package_id#revision', "
-                             "e.g: zlib/1.2.13:* means all binaries for zlib/1.2.13. "
+                             "e.g: \"zlib/1.2.13:*\" means all binaries for zlib/1.2.13. "
                              "If revision is not specified, it is assumed latest one.")
     parser.add_argument('-p', '--package-query', default=None, action=OnceArgument,
                         help="List only the packages matching a specific query, e.g, os=Windows AND "
@@ -256,12 +257,12 @@ def list(conan_api: ConanAPI, parser, *args):
                                  "a 'pkgname/version:*' pattern is necessary")
         # If neither remote nor cache are defined, show results only from cache
         pkglist = MultiPackagesList()
+        profile = conan_api.profiles.get_profile(args.filter_profile or [],
+                                                 args.filter_settings,
+                                                 args.filter_options) \
+            if args.filter_profile or args.filter_settings or args.filter_options else None
         if args.cache or not args.remote:
             try:
-                profile = conan_api.profiles.get_profile(args.filter_profile or [],
-                                                         args.filter_settings,
-                                                         args.filter_options) \
-                    if args.filter_profile or args.filter_settings or args.filter_options else None
                 cache_list = conan_api.list.select(ref_pattern, args.package_query, remote=None,
                                                    lru=args.lru, profile=profile)
             except Exception as e:
@@ -272,7 +273,8 @@ def list(conan_api: ConanAPI, parser, *args):
             remotes = conan_api.remotes.list(args.remote)
             for remote in remotes:
                 try:
-                    remote_list = conan_api.list.select(ref_pattern, args.package_query, remote)
+                    remote_list = conan_api.list.select(ref_pattern, args.package_query, remote,
+                                                        profile=profile)
                 except Exception as e:
                     pkglist.add_error(remote.name, str(e))
                 else:

@@ -20,7 +20,7 @@ from conans.errors import ConanException, NotFoundException, conanfile_exception
 from conans.model.conan_file import ConanFile
 from conans.model.options import Options
 from conans.model.recipe_ref import RecipeReference
-from conans.paths import DATA_YML
+from conan.internal.paths import DATA_YML
 from conans.util.files import load, chdir, load_user_encoded
 
 
@@ -323,7 +323,8 @@ def _load_python_file(conan_file_path):
         raise NotFoundException("%s not found!" % conan_file_path)
 
     def new_print(*args, **kwargs):  # Make sure that all user python files print() goes to stderr
-        print(*args, **kwargs, file=sys.stderr)
+        kwargs.setdefault("file", sys.stderr)
+        print(*args, **kwargs)
 
     module_id = str(uuid.uuid1())
     current_dir = os.path.dirname(conan_file_path)

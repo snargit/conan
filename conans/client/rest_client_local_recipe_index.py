@@ -1,7 +1,6 @@
 import os
 import sys
 import textwrap
-from distutils.dir_util import copy_tree
 from fnmatch import fnmatch
 from io import StringIO
 
@@ -11,10 +10,11 @@ from conan.api.model import LOCAL_RECIPES_INDEX
 from conan.api.output import ConanOutput
 from conan.internal.cache.home_paths import HomePaths
 from conans.client.cmd.export import cmd_export
+from conans.client.loader import ConanFileLoader
 from conans.errors import ConanException, PackageNotFoundException, RecipeNotFoundException
 from conans.model.conf import ConfDefinition
 from conans.model.recipe_ref import RecipeReference
-from conans.util.files import load, save, rmdir
+from conans.util.files import load, save, rmdir, copytree_compat
 
 
 def add_local_recipes_index_remote(conan_api, remote):
@@ -55,9 +55,9 @@ class RestApiClientLocalRecipesIndex:
     a local folder assuming the conan-center-index repo layout
     """
 
-    def __init__(self, remote, cache):
+    def __init__(self, remote, home_folder):
         self._remote = remote
-        local_recipes_index_path = HomePaths(cache.cache_folder).local_recipes_index_path
+        local_recipes_index_path = HomePaths(home_folder).local_recipes_index_path
         local_recipes_index_path = os.path.join(local_recipes_index_path, remote.name)
         local_recipes_index_path = os.path.join(local_recipes_index_path, ".conan")
         repo_folder = self._remote.url
@@ -160,7 +160,7 @@ class RestApiClientLocalRecipesIndex:
     def _copy_files(source_folder, dest_folder):
         if not os.path.exists(source_folder):
             return {}
-        copy_tree(source_folder, dest_folder)
+        copytree_compat(source_folder, dest_folder)
         ret = {}
         for root, _, _files in os.walk(dest_folder):
             for _f in _files:
@@ -191,7 +191,12 @@ class _LocalRecipesIndexLayout:
         recipes.sort()
         ret = []
         excluded = set()
+
+        loader = ConanFileLoader(None)
         for r in recipes:
+            if r.startswith("."):
+                # Skip hidden folders, no recipes should start with a dot
+                continue
             if not fnmatch(r, name_pattern):
                 continue
             folder = self._get_base_folder(r)
@@ -208,10 +213,18 @@ class _LocalRecipesIndexLayout:
                 # This check can be removed after compatibility with 2.0
                 conanfile = os.path.join(recipes_dir, r, subfolder, "conanfile.py")
                 conanfile_content = load(conanfile)
+
                 if "from conans" in conanfile_content or "import conans" in conanfile_content:
                     excluded.add(r)
                     continue
-                ret.append(RecipeReference.loads(ref))
+                ref = RecipeReference.loads(ref)
+                try:
+                    recipe = loader.load_basic(conanfile)
+                    ref.user = recipe.user
+                    ref.channel = recipe.channel
+                except Exception as e:
+                    ConanOutput().warning(f"Couldn't load recipe {conanfile}: {e}")
+                ret.append(ref)
         if excluded:
             ConanOutput().warning(f"Excluding recipes not Conan 2.0 ready: {', '.join(excluded)}")
         return ret
