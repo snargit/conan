@@ -66,7 +66,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
         set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }} PROPERTY IMPORTED_CONFIGURATIONS {{ config }} APPEND)
         set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }}
                      PROPERTY INTERFACE_LINK_LIBRARIES
-                     $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'FRAMEWORKS_FOUND', config_suffix) }}>
+                     $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'FRAMEWORKS_FOUND', config_suffix) }}
                      {{ pkg_var(pkg_name, 'SYSTEM_LIBS', config_suffix) }}
                      {{ deps_targets_names }}>
                      APPEND)
@@ -128,8 +128,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
 
             # This is only used for '#pragma comment(lib, "foo")' (automatic link)
             set_property(TARGET {{root_target_name}}
-                         APPEND PROPERTY INTERFACE_LINK_DIRECTORIES
-                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}>)
+                         PROPERTY INTERFACE_LINK_DIRECTORIES
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}> APPEND)
             {%- endif %}
 
 
@@ -157,7 +157,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                              $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'FRAMEWORKS_FOUND', config_suffix) }}
                              {{ comp_var(pkg_name, comp_variable_name, 'SYSTEM_LIBS', config_suffix) }}
                              {{ comp_var(pkg_name, comp_variable_name, 'DEPENDENCIES', config_suffix) }}>
-                             APPEND )
+                             APPEND)
 
                 ####### Find the libraries declared in cpp_info.component["xxx"].libs,
                 ####### create an IMPORTED target for each one and link the '{{pkg_name}}_{{comp_variable_name}}_DEPS_TARGET' to all of them
@@ -166,12 +166,12 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                                       "{{ comp_var(pkg_name, comp_variable_name, 'BIN_DIRS', config_suffix) }}" # package_bindir
                                       "{{ comp_var(pkg_name, comp_variable_name, 'LIBRARY_TYPE', config_suffix) }}"
                                       "{{ comp_var(pkg_name, comp_variable_name, 'IS_HOST_WINDOWS', config_suffix) }}"
-                                      {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }}
-                                      {{ comp_var(pkg_name, comp_variable_name, 'LIBRARIES_TARGETS', config_suffix) }}
+                                      {{ pkg_name + '_DEPS_TARGET'+config_suffix}}
+                                      {{ pkg_name }}_LIBRARIES_TARGETS{{config_suffix}}
                                       "{{ config_suffix }}"
                                       "{{ pkg_name }}_{{ comp_variable_name }}"
                                       "{{ comp_var(pkg_name, comp_variable_name, 'NO_SONAME_MODE', config_suffix)  }}"
-                                      "{{ config }})
+                                      "{{ config }}")
 
 
                 ########## TARGET PROPERTIES #####################################
@@ -179,7 +179,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                              PROPERTY INTERFACE_LINK_LIBRARIES
                              $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'OBJECTS', config_suffix) }}
                              {{ comp_var(pkg_name, comp_variable_name, 'LIBRARIES_TARGETS', config_suffix) }}>
-                             APPEND )
+                             APPEND)
 
                 if("{{ comp_var(pkg_name, comp_variable_name, 'LIBS', config_suffix) }}" STREQUAL "")
                     # If the component is not declaring any "cpp_info.components['foo'].libs" the system, frameworks etc are not
