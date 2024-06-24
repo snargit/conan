@@ -78,8 +78,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                                       "{{ pkg_var(pkg_name, 'BIN_DIRS', config_suffix) }}" # package_bindir
                                       "{{ pkg_var(pkg_name, 'LIBRARY_TYPE', config_suffix) }}"
                                       "{{ pkg_var(pkg_name, 'IS_HOST_WINDOWS', config_suffix) }}"
-                                      {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }}
-                                      {{ pkg_var(pkg_name, 'LIBRARIES_TARGETS', config_suffix) }}  # out_libraries_targets
+                                      {{ pkg_name + '_DEPS_TARGET'+config_suffix}}
+                                      {{ pkg_name }}_LIBRARIES_TARGETS{{config_suffix}} # out libraries target
                                       "{{ config_suffix }}"
                                       "{{ pkg_name }}"    # package_name
                                       "{{ pkg_var(pkg_name, 'NO_SONAME_MODE', config_suffix) }}" # soname
@@ -148,8 +148,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 set({{ pkg_name }}_{{ comp_variable_name }}_LIBRARIES_TARGETS{{config_suffix}} "")
 
                 ######## Create an interface target to contain all the dependencies (frameworks, system and conan deps)
-                if(NOT TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }})
-                    add_library({{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix}} INTERFACE IMPORTED)
+                if(NOT TARGET {{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }})
+                    add_library({{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }} INTERFACE IMPORTED)
                 endif()
                 set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }} PROPERTY IMPORTED_CONFIGURATIONS {{ config }} APPEND)
                 set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }}
