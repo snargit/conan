@@ -101,7 +101,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 # global target
                 set_property(TARGET {{root_target_name}}
                              APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                             {{pkg_name+'_DEPS_TARGET'+config_suffix)
+                             {{pkg_name+'_DEPS_TARGET'+config_suffix}})
             endif()
 
             set_property(TARGET {{root_target_name}}
