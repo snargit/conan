@@ -78,7 +78,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                                       "{{ pkg_var(pkg_name, 'LIBRARY_TYPE', config_suffix) }}"
                                       "{{ pkg_var(pkg_name, 'IS_HOST_WINDOWS', config_suffix) }}"
                                       {{ pkg_name + '_DEPS_TARGET'+config_suffix}}
-                                      {{ pkg_name }}_LIBRARIES_TARGETS{{config_suffix}} # out libraries target
+                                      {{ pkg_name + '_LIBRARIES_TARGETS'+config_suffix}} # out libraries target
                                       "{{ config_suffix }}"
                                       "{{ pkg_name }}"    # package_name
                                       "{{ pkg_var(pkg_name, 'NO_SONAME_MODE', config_suffix) }}" # soname
