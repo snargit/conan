@@ -60,11 +60,11 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
 
 
         ######## Create an interface target to contain all the dependencies (frameworks, system and conan deps)
-        if(NOT TARGET {{ pkg_name+'_DEPS_TARGET'+config_suffix}})
-            add_library({{ pkg_name+'_DEPS_TARGET'+config_suffix}} INTERFACE IMPORTED)
+        if(NOT TARGET {{ pkg_name+'_DEPS_TARGET'+config_suffix }})
+            add_library({{ pkg_name+'_DEPS_TARGET'+config_suffix }} INTERFACE IMPORTED)
         endif()
-        set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
-        set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }}
+        set_property(TARGET {{ pkg_name+'_DEPS_TARGET'+config_suffix }} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
+        set_property(TARGET {{ pkg_name+'_DEPS_TARGET'+config_suffix }}
                      APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                      $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'FRAMEWORKS_FOUND', config_suffix) }}
                      {{ pkg_var(pkg_name, 'SYSTEM_LIBS', config_suffix) }}
@@ -89,7 +89,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
         {% if not components_names %}
 
         ########## GLOBAL TARGET PROPERTIES {{ configuration }} ########################################
-            set_property(TARGET {{root_target_name}} PROPERTY IMPORTED_CONFIGURATIONS {{ config }} APPEND)
+            set_property(TARGET {{root_target_name}} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                          $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'OBJECTS', config_suffix) }}
@@ -101,25 +101,25 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 # global target
                 set_property(TARGET {{root_target_name}}
                              APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                             {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }})
+                             {{pkg_name+'_DEPS_TARGET'+config_suffix)
             endif()
 
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_LINK_OPTIONS
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'LINKER_FLAGS', config_suffix) }}>)
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'LINKER_FLAGS', config_suffix) }}>)
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'INCLUDE_DIRS', config_suffix) }}>)
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'INCLUDE_DIRS', config_suffix) }}>)
             # Necessary to find LINK shared libraries in Linux
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_LINK_DIRECTORIES
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}>)
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}>)
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'COMPILE_DEFINITIONS', config_suffix) }}>)
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'COMPILE_DEFINITIONS', config_suffix) }}>)
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_COMPILE_OPTIONS
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'COMPILE_OPTIONS', config_suffix) }}>)
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'COMPILE_OPTIONS', config_suffix) }}>)
 
             {%- if set_interface_link_directories %}
 
@@ -148,8 +148,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 if(NOT TARGET {{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }})
                     add_library({{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }} INTERFACE IMPORTED)
                 endif()
-                set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
-                set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }}
+                set_property(TARGET {{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
+                set_property(TARGET {{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }}
                              APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                              $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'FRAMEWORKS_FOUND', config_suffix) }}
                              {{ comp_var(pkg_name, comp_variable_name, 'SYSTEM_LIBS', config_suffix) }}
@@ -162,8 +162,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                                       "{{ comp_var(pkg_name, comp_variable_name, 'BIN_DIRS', config_suffix) }}" # package_bindir
                                       "{{ comp_var(pkg_name, comp_variable_name, 'LIBRARY_TYPE', config_suffix) }}"
                                       "{{ comp_var(pkg_name, comp_variable_name, 'IS_HOST_WINDOWS', config_suffix) }}"
-                                      {{ pkg_name + '_DEPS_TARGET'+config_suffix}}
-                                      {{ pkg_name }}_LIBRARIES_TARGETS{{config_suffix}}
+                                      {{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix}}
+                                      {{ pkg_name + '_' + comp_variable_name + '_LIBRARIES_TARGETS'+config_suffix}}
                                       "{{ config_suffix }}"
                                       "{{ pkg_name }}_{{ comp_variable_name }}"
                                       "{{ comp_var(pkg_name, comp_variable_name, 'NO_SONAME_MODE', config_suffix)  }}"

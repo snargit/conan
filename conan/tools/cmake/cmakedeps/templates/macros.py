@@ -82,7 +82,7 @@ class MacrosTemplate(CMakeDepsFileTemplate):
                         set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_LOCATION${config_suffix} ${CONAN_SHARED_FOUND_LIBRARY})
                         set_target_properties(${_LIB_NAME} PROPERTIES IMPORTED_IMPLIB${config_suffix} ${CONAN_FOUND_LIBRARY})
                         set_property(TARGET ${_LIB_NAME} APPEND PROPERTY IMPORTED_CONFIGURATIONS "${configuration_name}")
-                        message(DEBUG "Found DLL and STATIC at ${CONAN_SHARED_FOUND_LIBRARY}, ${CONAN_FOUND_LIBRARY}")
+                        message(DEBUG "Found DLL and STATIC at ${CONAN_SHARED_FOUND_LIBRARY}, ${CONAN_FOUND_LIBRARY} for ${configuration_name} configuration")
                      endif()
                      unset(CONAN_SHARED_FOUND_LIBRARY CACHE)
                    else()
