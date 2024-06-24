@@ -63,13 +63,12 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
         if(NOT TARGET {{ pkg_name+'_DEPS_TARGET'+config_suffix}})
             add_library({{ pkg_name+'_DEPS_TARGET'+config_suffix}} INTERFACE IMPORTED)
         endif()
-        set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }} PROPERTY IMPORTED_CONFIGURATIONS {{ config }} APPEND)
+        set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
         set_property(TARGET {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }}
-                     PROPERTY INTERFACE_LINK_LIBRARIES
+                     APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                      $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'FRAMEWORKS_FOUND', config_suffix) }}
                      {{ pkg_var(pkg_name, 'SYSTEM_LIBS', config_suffix) }}
-                     {{ deps_targets_names }}>
-                     APPEND)
+                     {{ deps_targets_names }}>)
 
         ####### Find the libraries declared in cpp_info.libs, create an IMPORTED target for each one and link the
         ####### {{pkg_name}}_DEPS_TARGET{{config_suffix}} to all of them
@@ -92,44 +91,42 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
         ########## GLOBAL TARGET PROPERTIES {{ configuration }} ########################################
             set_property(TARGET {{root_target_name}} PROPERTY IMPORTED_CONFIGURATIONS {{ config }} APPEND)
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_LINK_LIBRARIES
+                         APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                          $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'OBJECTS', config_suffix) }}
-                         {{ pkg_var(pkg_name, 'LIBRARIES_TARGETS', config_suffix) }}>
-                         APPEND)
+                         {{ pkg_var(pkg_name, 'LIBRARIES_TARGETS', config_suffix) }}>)
 
             if("{{ pkg_var(pkg_name, 'LIBS', config_suffix) }}" STREQUAL "")
                 # If the package is not declaring any "cpp_info.libs" the package deps, system libs,
                 # frameworks etc are not linked to the imported targets and we need to do it to the
                 # global target
                 set_property(TARGET {{root_target_name}}
-                             PROPERTY INTERFACE_LINK_LIBRARIES
-                             {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }}
-                             APPEND)
+                             APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                             {{ pkg_var(pkg_name, 'DEPS_TARGET', config_suffix) }})
             endif()
 
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_LINK_OPTIONS
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'LINKER_FLAGS', config_suffix) }}> APPEND)
+                         APPEND PROPERTY INTERFACE_LINK_OPTIONS
+                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'LINKER_FLAGS', config_suffix) }}>)
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'INCLUDE_DIRS', config_suffix) }}> APPEND)
+                         APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'INCLUDE_DIRS', config_suffix) }}>)
             # Necessary to find LINK shared libraries in Linux
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_LINK_DIRECTORIES
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}> APPEND)
+                         APPEND PROPERTY INTERFACE_LINK_DIRECTORIES
+                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}>)
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_COMPILE_DEFINITIONS
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'COMPILE_DEFINITIONS', config_suffix) }}> APPEND)
+                         APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS
+                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'COMPILE_DEFINITIONS', config_suffix) }}>)
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_COMPILE_OPTIONS
-                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'COMPILE_OPTIONS', config_suffix) }}> APPEND)
+                         APPEND PROPERTY INTERFACE_COMPILE_OPTIONS
+                         $<$<CONFIG:{{configuration}}>:${{ pkg_var(pkg_name, 'COMPILE_OPTIONS', config_suffix) }}>)
 
             {%- if set_interface_link_directories %}
 
             # This is only used for '#pragma comment(lib, "foo")' (automatic link)
             set_property(TARGET {{root_target_name}}
-                         PROPERTY INTERFACE_LINK_DIRECTORIES
-                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}> APPEND)
+                         APPEND PROPERTY INTERFACE_LINK_DIRECTORIES
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'LIB_DIRS', config_suffix) }}>)
             {%- endif %}
 
 
@@ -151,13 +148,12 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 if(NOT TARGET {{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }})
                     add_library({{ pkg_name + '_' + comp_variable_name + '_DEPS_TARGET'+config_suffix }} INTERFACE IMPORTED)
                 endif()
-                set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }} PROPERTY IMPORTED_CONFIGURATIONS {{ config }} APPEND)
+                set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
                 set_property(TARGET {{ comp_var(pkg_name, comp_variable_name, 'DEPS_TARGET', config_suffix) }}
-                             PROPERTY INTERFACE_LINK_LIBRARIES
+                             APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                              $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'FRAMEWORKS_FOUND', config_suffix) }}
                              {{ comp_var(pkg_name, comp_variable_name, 'SYSTEM_LIBS', config_suffix) }}
-                             {{ comp_var(pkg_name, comp_variable_name, 'DEPENDENCIES', config_suffix) }}>
-                             APPEND)
+                             {{ comp_var(pkg_name, comp_variable_name, 'DEPENDENCIES', config_suffix) }}>)
 
                 ####### Find the libraries declared in cpp_info.component["xxx"].libs,
                 ####### create an IMPORTED target for each one and link the '{{pkg_name}}_{{comp_variable_name}}_DEPS_TARGET' to all of them
@@ -176,35 +172,33 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
 
                 ########## TARGET PROPERTIES #####################################
                 set_property(TARGET {{comp_target_name}}
-                             PROPERTY INTERFACE_LINK_LIBRARIES
+                             APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                              $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'OBJECTS', config_suffix) }}
-                             {{ comp_var(pkg_name, comp_variable_name, 'LIBRARIES_TARGETS', config_suffix) }}>
-                             APPEND)
+                             {{ comp_var(pkg_name, comp_variable_name, 'LIBRARIES_TARGETS', config_suffix) }}>)
 
                 if("{{ comp_var(pkg_name, comp_variable_name, 'LIBS', config_suffix) }}" STREQUAL "")
                     # If the component is not declaring any "cpp_info.components['foo'].libs" the system, frameworks etc are not
                     # linked to the imported targets and we need to do it to the global target
                     set_property(TARGET {{comp_target_name}}
-                                 PROPERTY INTERFACE_LINK_LIBRARIES
-                                 $<$<CONFIG:{{configuration}}>:{{pkg_name}}_{{comp_variable_name}}_DEPS_TARGET{{config_suffix}}>
-                                 APPEND)
+                                 APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                                 $<$<CONFIG:{{configuration}}>:{{pkg_name}}_{{comp_variable_name}}_DEPS_TARGET{{config_suffix}}>)
                 endif()
 
-                set_property(TARGET {{ comp_target_name }} PROPERTY INTERFACE_LINK_OPTIONS
-                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'LINKER_FLAGS', config_suffix) }}> APPEND)
-                set_property(TARGET {{ comp_target_name }} PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'INCLUDE_DIRS', config_suffix) }}> APPEND)
-                set_property(TARGET {{comp_target_name }} PROPERTY INTERFACE_LINK_DIRECTORIES
-                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'LIB_DIRS', config_suffix) }}> APPEND)
-                set_property(TARGET {{ comp_target_name }} PROPERTY INTERFACE_COMPILE_DEFINITIONS
-                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'COMPILE_DEFINITIONS', config_suffix) }}> APPEND)
-                set_property(TARGET {{ comp_target_name }} PROPERTY INTERFACE_COMPILE_OPTIONS
-                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'COMPILE_OPTIONS', config_suffix) }}> APPEND)
+                set_property(TARGET {{ comp_target_name }} APPEND PROPERTY INTERFACE_LINK_OPTIONS
+                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'LINKER_FLAGS', config_suffix) }}>)
+                set_property(TARGET {{ comp_target_name }} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'INCLUDE_DIRS', config_suffix) }}>)
+                set_property(TARGET {{comp_target_name }} APPEND PROPERTY INTERFACE_LINK_DIRECTORIES
+                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'LIB_DIRS', config_suffix) }}>)
+                set_property(TARGET {{ comp_target_name }} APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS
+                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'COMPILE_DEFINITIONS', config_suffix) }}>)
+                set_property(TARGET {{ comp_target_name }} APPEND PROPERTY INTERFACE_COMPILE_OPTIONS
+                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'COMPILE_OPTIONS', config_suffix) }}>)
 
                 {%- if set_interface_link_directories %}
                 # This is only used for '#pragma comment(lib, "foo")' (automatic link)
-                set_property(TARGET {{ comp_target_name }} PROPERTY INTERFACE_LINK_DIRECTORIES
-                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'LIB_DIRS', config_suffix) }}> APPEND)
+                set_property(TARGET {{ comp_target_name }} APPEND PROPERTY INTERFACE_LINK_DIRECTORIES
+                             $<$<CONFIG:{{ configuration }}>:{{ comp_var(pkg_name, comp_variable_name, 'LIB_DIRS', config_suffix) }}>)
 
                 {%- endif %}
             {%endfor %}
@@ -213,7 +207,7 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
             ########## AGGREGATED GLOBAL TARGET WITH THE COMPONENTS #####################
             {%- for comp_variable_name, comp_target_name in components_names %}
 
-            set_property(TARGET {{root_target_name}} PROPERTY INTERFACE_LINK_LIBRARIES {{ comp_target_name }} APPEND)
+            set_property(TARGET {{root_target_name}} APPEND PROPERTY INTERFACE_LINK_LIBRARIES {{ comp_target_name }})
 
             {%- endfor %}
 
