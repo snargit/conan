@@ -94,7 +94,18 @@ class TargetsTemplate(CMakeDepsFileTemplate):
 
         # Load the debug and release variables
         get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-        file(GLOB DATA_FILES "{{data_pattern}}")
+        file(GLOB DATA_FILES LIST_DIRECTORIES false "{{data_pattern}}")
+                               
+        # Figure out the available configurations
+        set(allConfigs "")
+        foreach(fn ${DATA_FILES})
+            if (fn MATCHES ".*{{cmake_component_target_name}}-(.*)-.*-.*data\\\\.cmake")
+                string(TOUPPER "${CMAKE_MATCH_1}" upMatch)
+                list(APPEND allConfigs ${upMatch})
+            endif()
+        endforeach()
+        list(REMOVE_DUPLICATES allConfigs)
+        message({% raw %}${{% endraw %}{{ file_name }}_MESSAGE_MODE} "Found configurations ${allConfigs}")
 
         foreach(f ${DATA_FILES})
             include(${f})
@@ -140,7 +151,8 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         {%- endfor %}
 
         # Load the debug and release library finders
-        file(GLOB CONFIG_FILES "${CMAKE_CURRENT_LIST_DIR}/{{ target_pattern }}")
+        get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+        file(GLOB CONFIG_FILES "${_DIR}/{{ target_pattern }}")
 
         foreach(f ${CONFIG_FILES})
             include(${f})
