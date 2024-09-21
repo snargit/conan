@@ -95,7 +95,7 @@ class TargetsTemplate(CMakeDepsFileTemplate):
         # Load the debug and release variables
         get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
         file(GLOB DATA_FILES LIST_DIRECTORIES false "{{data_pattern}}")
-                               
+
         # Figure out the available configurations
         set(allConfigs "")
         foreach(fn ${DATA_FILES})
