@@ -92,8 +92,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
             set_property(TARGET {{root_target_name}} APPEND PROPERTY IMPORTED_CONFIGURATIONS {{ config }})
             set_property(TARGET {{root_target_name}}
                          APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'OBJECTS', config_suffix) }}
-                         {{ pkg_var(pkg_name, 'LIBRARIES_TARGETS', config_suffix) }}>)
+                         $<$<CONFIG:{{configuration}}>:{{ pkg_var(pkg_name, 'OBJECTS', config_suffix) }}>
+                         {{ pkg_var(pkg_name, 'LIBRARIES_TARGETS', config_suffix) }})
 
             if("{{ pkg_var(pkg_name, 'LIBS', config_suffix) }}" STREQUAL "")
                 # If the package is not declaring any "cpp_info.libs" the package deps, system libs,
@@ -173,8 +173,8 @@ class TargetConfigurationTemplate(CMakeDepsFileTemplate):
                 ########## TARGET PROPERTIES #####################################
                 set_property(TARGET {{comp_target_name}}
                              APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                             $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'OBJECTS', config_suffix) }}
-                             {{ comp_var(pkg_name, comp_variable_name, 'LIBRARIES_TARGETS', config_suffix) }}>)
+                             $<$<CONFIG:{{configuration}}>:{{ comp_var(pkg_name, comp_variable_name, 'OBJECTS', config_suffix) }}>
+                             {{ comp_var(pkg_name, comp_variable_name, 'LIBRARIES_TARGETS', config_suffix) }})
 
                 if("{{ comp_var(pkg_name, comp_variable_name, 'LIBS', config_suffix) }}" STREQUAL "")
                     # If the component is not declaring any "cpp_info.components['foo'].libs" the system, frameworks etc are not
