@@ -115,3 +115,4 @@ Session.vim
 !test/unittests/tools/build
 /TestResults
 /env
+/conans/test/conftest_user.py
