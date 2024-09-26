@@ -4,9 +4,9 @@ import pytest
 from mock import Mock
 
 from conan import ConanFile
+from conan.internal.default_settings import default_settings_yml
 from conan.tools.cmake import CMakeToolchain
 from conan.tools.cmake.toolchain.blocks import Block
-from conans.client.conf import get_default_settings_yml
 from conans.errors import ConanException
 from conans.model.conf import Conf
 from conans.model.options import Options
@@ -93,6 +93,34 @@ def test_select_blocks(conanfile):
     assert "########## 'generic_system' block #############" in content
     assert "########## 'variables' block #############" not in content
     assert "########## 'preprocessor' block #############" not in content
+
+
+def test_enabled_blocks_conf(conanfile):
+    conanfile.conf.define("tools.cmake.cmaketoolchain:enabled_blocks", ["generic_system"])
+    toolchain = CMakeToolchain(conanfile)
+    content = toolchain.content
+    assert "########## 'generic_system' block #############" in content
+    assert "########## 'cmake_flags_init' block #############" not in content
+    assert "########## 'libcxx' block #############" not in content
+    assert "########## 'variables' block #############" not in content
+    assert "########## 'preprocessor' block #############" not in content
+
+    # remove multiple
+    conanfile.conf.define("tools.cmake.cmaketoolchain:enabled_blocks",
+                          ["generic_system", "cmake_flags_init"])
+    toolchain = CMakeToolchain(conanfile)
+    content = toolchain.content
+    assert "########## 'generic_system' block #############" in content
+    assert "########## 'cmake_flags_init' block #############" in content
+    assert "########## 'libcxx' block #############" not in content
+    assert "########## 'variables' block #############" not in content
+    assert "########## 'preprocessor' block #############" not in content
+
+    conanfile.conf.define("tools.cmake.cmaketoolchain:enabled_blocks", ["potato"])
+    toolchain = CMakeToolchain(conanfile)
+    with pytest.raises(ConanException) as e:
+        _ = toolchain.content
+    assert "Block 'potato' defined in tools.cmake.cmaketoolchain:enabled_blocks doesn't" in str(e)
 
 
 def test_dict_keys(conanfile):
@@ -505,7 +533,7 @@ def test_fpic_enabled(conanfile_linux_fpic):
 def test_libcxx_abi_flag():
     c = ConanFile()
     c.settings = "os", "compiler", "build_type", "arch"
-    c.settings = Settings.loads(get_default_settings_yml())
+    c.settings = Settings.loads(default_settings_yml)
     c.settings.build_type = "Release"
     c.settings.arch = "x86_64"
     c.settings.compiler = "gcc"
@@ -553,7 +581,7 @@ def test_apple_cmake_osx_sysroot(os, os_sdk, arch, expected_sdk):
     """
     c = ConanFile()
     c.settings = "os", "compiler", "build_type", "arch"
-    c.settings = Settings.loads(get_default_settings_yml())
+    c.settings = Settings.loads(default_settings_yml)
     c.settings.os = os
     if os_sdk:
         c.settings.os.sdk = os_sdk
@@ -587,7 +615,7 @@ def test_apple_cmake_osx_sysroot_sdk_mandatory(os, arch, expected_sdk):
     """
     c = ConanFile()
     c.settings = "os", "compiler", "build_type", "arch"
-    c.settings = Settings.loads(get_default_settings_yml())
+    c.settings = Settings.loads(default_settings_yml)
     c.settings.os = os
     c.settings.build_type = "Release"
     c.settings.arch = arch
@@ -622,10 +650,12 @@ def test_compilers_block(conanfile):
 
 
 def test_linker_scripts_block(conanfile):
-    conanfile.conf.define("tools.build:linker_scripts", ["path_to_first_linker_script", "path_to_second_linker_script"])
+    conanfile.conf.define("tools.build:linker_scripts",
+                          ["path_to_first_linker_script", "path_to_second_linker_script"])
     toolchain = CMakeToolchain(conanfile)
     content = toolchain.content
-    assert f'string(APPEND CONAN_EXE_LINKER_FLAGS -T"path_to_first_linker_script" -T"path_to_second_linker_script")' in content
+    assert r'string(APPEND CONAN_EXE_LINKER_FLAGS " -T\"path_to_first_linker_script\" ' \
+           r'-T\"path_to_second_linker_script\"")' in content
 
 
 class TestCrossBuild:
